@@ -82,7 +82,7 @@ def perform_search(pdf_paths):
         # Upload the contents and metadata to Pinecone
         metadata = [t.metadata for t in texts]
         page = [t.page_content for t in texts]
-        if not pinecone.list_indexes:
+        if not pinecone.list_indexes():
             pinecone.create_index(dimension=1536, name='intelpdf', metric='cosine')
             docsearch = Pinecone.from_texts(page, embeddings, metadatas=metadata, index_name='intelpdf')
             #time.sleep(10)
