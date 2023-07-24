@@ -14,9 +14,9 @@ from config import openai_api, pinecone_api,pinecone_env
 
 
 # Check to see if there is an environment variable with your API keys, if not, use what you put below
-OPENAI_API_KEY = openai_api
-PINECONE_API_KEY = pinecone_api
-PINECONE_API_ENV = pinecone_env
+OPENAI_API_KEY = st.secrets["openai_api"]
+PINECONE_API_KEY = st.secrets["pinecone_api"]
+PINECONE_API_ENV = st.secrets["pinecone_env"]
 
 api_key = PINECONE_API_KEY
 pinecone.init(
