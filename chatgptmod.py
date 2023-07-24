@@ -85,14 +85,14 @@ def perform_search(pdf_paths):
         if not pinecone.list_indexes():
             pinecone.create_index(dimension=1536, name='intelpdf', metric='cosine')
             docsearch = Pinecone.from_texts(page, embeddings, metadatas=metadata, index_name='intelpdf')
-            #time.sleep(10)
+            time.sleep(2)
         else:
 
             #pinecone.delete_index('intelpdf')
             index = pinecone.Index("intelpdf")
             vectorstore = Pinecone(index, embeddings.embed_query,'text')
             vectorstore.add_texts(page,metadata)
-            #time.sleep(10)
+            time.sleep(2)
 
 
 # Streamlit app
