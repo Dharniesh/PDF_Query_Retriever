@@ -80,11 +80,19 @@ def perform_search(pdf_paths):
         texts = text_splitter.split_documents(data)
 
         # Upload the contents and metadata to Pinecone
-        metadatas = [t.metadata for t in texts]
-        pinecone.delete_index('intelpdf')
-        pinecone.create_index(dimension=1536, name='intelpdf', metric='cosine')
-        docsearch = Pinecone.from_texts([t.page_content for t in texts], embeddings, metadatas=metadatas, index_name='intelpdf')
-        time.sleep(20)
+        metadata = [t.metadata for t in texts]
+        page = [t.page_content for t in texts]
+        if not pinecone.list_indexes:
+            pinecone.create_index(dimension=1536, name='intelpdf', metric='cosine')
+            docsearch = Pinecone.from_texts(page, embeddings, metadatas=metadata, index_name='intelpdf')
+            #time.sleep(10)
+        else:
+
+            #pinecone.delete_index('intelpdf')
+            index = pinecone.Index("intelpdf")
+            vectorstore = Pinecone(index, embeddings.embed_query,'text')
+            vectorstore.add_texts(page,metadata)
+            #time.sleep(10)
 
 
 # Streamlit app
