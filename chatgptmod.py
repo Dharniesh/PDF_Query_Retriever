@@ -32,7 +32,7 @@ def query_find(query):
     docs = docsearch.similarity_search(query=query, k=5)
 
     # Initialize OpenAI model and perform question-answering
-    llm = OpenAI(temperature=0, openai_api_key=OPENAI_API_KEY)
+    llm = OpenAI(temperature=0.2, openai_api_key=OPENAI_API_KEY)
     chain = load_qa_chain(llm, chain_type="stuff")
 
     # Assuming 'docs' is the list containing your documents or elements
