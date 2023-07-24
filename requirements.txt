@@ -5,3 +5,4 @@ PyPDF2<3.0
 openai
 tiktoken
 pypdf
+pycryptodome==3.15.0
