@@ -10,7 +10,6 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.llms import OpenAI
 from langchain.chains.question_answering import load_qa_chain
 import streamlit as st
-from config import openai_api, pinecone_api,pinecone_env
 
 
 # Check to see if there is an environment variable with your API keys, if not, use what you put below
