@@ -42,7 +42,7 @@ def query_find(query):
 def upload_text_batch(page_texts, metadata):
     print('upload text batch')
     #index.upsert(page_texts)
-    vectorstore.add_texts(page_texts, metadata,batch_size=1000) 
+    vectorstore.add_texts(page_texts, metadata,batch_size=100) 
 
 def process_pdf(pdf_path):
     print('process pdf')
@@ -54,7 +54,7 @@ def process_pdf(pdf_path):
     doc_name = os.path.basename(pdf_path)
 
     # Split the PDF into smaller chunks
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=50000, chunk_overlap=0)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=3500, chunk_overlap=0)
     texts = text_splitter.split_documents(data)
 
     # Upload the contents and metadata to Pinecone
