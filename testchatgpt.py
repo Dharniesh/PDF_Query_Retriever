@@ -20,6 +20,21 @@ PINECONE_API_ENV = st.secrets["pinecone_env"]
 
 api_key = PINECONE_API_KEY
 
+
+embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+llm = OpenAI(temperature=0, openai_api_key=OPENAI_API_KEY)
+
+# Initialize Pinecone and set the api_key
+pinecone.init(api_key=api_key, environment=PINECONE_API_ENV)
+if not pinecone.list_indexes():
+    pinecone.create_index(dimension=1536, name='intelpdf', metric='cosine')
+
+docsearch = Pinecone.from_existing_index(index_name='intelpdf', embedding=embeddings)
+index = pinecone.Index("intelpdf", pool_threads=30)
+vectorstore = Pinecone(index, embeddings.embed_query, 'text')
+
+chain = load_qa_chain(llm, chain_type="refine")
+
 def query_find(query):
     print('inside queryfind')
     # Perform the similarity search and get the documents
@@ -170,21 +185,6 @@ def main():
             st.write(pgn)
             st.subheader('Document Name')
             st.write(doc_name)
-
-
-embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
-llm = OpenAI(temperature=0, openai_api_key=OPENAI_API_KEY)
-
-# Initialize Pinecone and set the api_key
-pinecone.init(api_key=api_key, environment=PINECONE_API_ENV)
-if not pinecone.list_indexes():
-    pinecone.create_index(dimension=1536, name='intelpdf', metric='cosine')
-
-docsearch = Pinecone.from_existing_index(index_name='intelpdf', embedding=embeddings)
-index = pinecone.Index("intelpdf", pool_threads=30)
-vectorstore = Pinecone(index, embeddings.embed_query, 'text')
-
-chain = load_qa_chain(llm, chain_type="refine")
 
 
 if __name__ == "__main__":
