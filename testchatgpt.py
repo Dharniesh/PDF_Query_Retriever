@@ -13,8 +13,6 @@ from langchain.memory import ConversationBufferWindowMemory
 
 from langchain.chains import ConversationChain
 
-from config import openai_api, pinecone_api, pinecone_env
-
 # Check to see if there is an environment variable with your API keys, if not, use what you put below
 OPENAI_API_KEY = st.secrets["openai_api"]
 PINECONE_API_KEY = st.secrets["pinecone_api"]
