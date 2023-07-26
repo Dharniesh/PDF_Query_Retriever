@@ -115,14 +115,14 @@ def search_openai():
 # Streamlit app
 # ... (Previous code remains the same)
 
-# ... (Previous code remains the same)
-
 def main():
     st.title("PDF Document Search and Question Answering")
     print('init and checking pinecone')
+    # Initialize Pinecone and set the api_key
     pinecone.init(api_key=api_key, environment=PINECONE_API_ENV)
     if not pinecone.list_indexes():
         pinecone.create_index(dimension=1536, name='intelpdf', metric='cosine')
+
     # File Upload
     uploaded_files = st.file_uploader("Choose multiple PDF files to merge and search:", type=["pdf"],
                                       accept_multiple_files=True)
@@ -131,21 +131,21 @@ def main():
         print('inside upload files main')
         # Create a temporary directory to store the uploaded files
         # Create a temporary directory to store the uploaded files
-    with tempfile.TemporaryDirectory() as temp_dir:
-        pdf_paths = []
-        for i, file in enumerate(uploaded_files):
-            # Get the original filename from the uploaded file
-            original_filename = file.name
-            # Save the uploaded PDF files to the temporary directory with the original filename
-            temp_path = os.path.join(temp_dir, original_filename)
-            with open(temp_path, "wb") as f:
-                f.write(file.getbuffer())
-            pdf_paths.append(temp_path)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            pdf_paths = []
+            for i, file in enumerate(uploaded_files):
+                # Get the original filename from the uploaded file
+                original_filename = file.name
+                # Save the uploaded PDF files to the temporary directory with the original filename
+                temp_path = os.path.join(temp_dir, original_filename)
+                with open(temp_path, "wb") as f:
+                    f.write(file.getbuffer())
+                pdf_paths.append(temp_path)
 
-        if st.button("Upload", key="upload_button"):
-            st.text("Uploading files...")
-            perform_search(pdf_paths)
-            st.session_state.perform_search_done = True  # Set the session state variable to indicate files are uploaded
+            if st.button("Upload", key="upload_button"):
+                st.text("Uploading files...")
+                perform_search(pdf_paths)
+                st.session_state.perform_search_done = True  # Set the session state variable to indicate files are uploaded
 
 
     # Wait for files to be uploaded and perform_search to be done before showing the query input
@@ -163,7 +163,7 @@ def main():
 
         # PDF Answer button in the second column
         if col2.button("PDF Answer"):
-            con, pgn,doc_name = query_find(query)
+            con, pgn, doc_name = query_find(query)
             st.subheader("PDF Answer:")
             st.write(con)
             st.subheader("Page Number:")
@@ -174,6 +174,12 @@ def main():
 
 embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
 llm = OpenAI(temperature=0, openai_api_key=OPENAI_API_KEY)
+
+# Initialize Pinecone and set the api_key
+pinecone.init(api_key=api_key, environment=PINECONE_API_ENV)
+if not pinecone.list_indexes():
+    pinecone.create_index(dimension=1536, name='intelpdf', metric='cosine')
+
 docsearch = Pinecone.from_existing_index(index_name='intelpdf', embedding=embeddings)
 index = pinecone.Index("intelpdf", pool_threads=30)
 vectorstore = Pinecone(index, embeddings.embed_query, 'text')
@@ -183,3 +189,4 @@ chain = load_qa_chain(llm, chain_type="refine")
 
 if __name__ == "__main__":
     main()
+
