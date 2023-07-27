@@ -1,7 +1,10 @@
 import os
 import pinecone
 import tempfile
-import PyPDF2
+from PyPDF2 import PdfMerger
+import glob
+import fitz
+from pdf2image import convert_from_path
 from langchain.vectorstores import Pinecone
 from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -10,8 +13,11 @@ from langchain.llms import OpenAI
 from langchain.chains.question_answering import load_qa_chain
 import streamlit as st
 from langchain.memory import ConversationBufferWindowMemory
-
+import time
 from langchain.chains import ConversationChain
+from config import openai_api, pinecone_api,pinecone_env
+import pytesseract
+import shutil
 
 # Check to see if there is an environment variable with your API keys, if not, use what you put below
 OPENAI_API_KEY = st.secrets["openai_api"]
@@ -35,6 +41,7 @@ vectorstore = Pinecone(index, embeddings.embed_query, 'text')
 
 chain = load_qa_chain(llm, chain_type="refine")
 
+
 def query_find(query):
     print('inside queryfind')
     docsearch = Pinecone.from_existing_index(index_name='intelpdf', embedding=embeddings)
@@ -43,8 +50,14 @@ def query_find(query):
 
     # Assuming 'docs' is the list containing your documents or elements
     #print(docs)
-    pg_ref = [doc.metadata['page'] + 1 for doc in docs]
-    doc_name = [doc.metadata['source'] for doc in docs]
+    if 'page' in docs[0].metadata:
+        pg_ref = [doc.metadata['page'] + 1 for doc in docs]
+    else: 
+        pg_ref = ['Unavailable']
+    if 'source' in docs[0].metadata:  
+        doc_name = [doc.metadata['source'] for doc in docs]
+    else:
+        doc_name= 'Unavailable'
 
     result = chain.run(input_documents=docs, question=query)
 
@@ -60,6 +73,12 @@ def upload_text_batch(page_texts, metadata):
     #index.upsert(page_texts)
     vectorstore.add_texts(page_texts, metadata,batch_size=100)
     time.sleep(2)
+
+def imgToPdf(path):
+    PDF = pytesseract.image_to_pdf_or_hocr(path, extension='pdf')
+    # export to searchable.pdf
+    with open("searchable.pdf", "w+b") as f:
+        f.write(bytearray(PDF))
 
 def process_pdf(pdf_path):
     print('process pdf')
@@ -126,11 +145,73 @@ def search_openai():
     else:
         st.warning("Please enter a question.")
 
+def perform_ocr(image, page_number, output_dir):
+    # Perform OCR and extract text from the image
+    text = pytesseract.image_to_pdf_or_hocr(image, extension='pdf')
+    
+    # Save the OCR'd PDF image with a unique filename
+    ocr_pdf_filename = os.path.join(output_dir, f'ocr_page_{page_number}.pdf')
+    with open(ocr_pdf_filename, 'wb') as f:
+        f.write(text)
+
+    return ocr_pdf_filename
 
 
+def convert_pdf_to_searchable_pdf(input_pdf_file, output_dir, original_filename):
+    # Create the "converted" subfolder within the output directory if it does not exist
+    converted_output_dir = os.path.join(output_dir, 'converted')
+    os.makedirs(converted_output_dir, exist_ok=True)
 
-# Streamlit app
-# ... (Previous code remains the same)
+    # Convert PDF pages to images
+    images = convert_from_path(input_pdf_file, output_folder=converted_output_dir)
+
+    # Perform OCR on each image and save as PDF
+    ocr_pdf_files = []
+    for i, image in enumerate(images):
+        ocr_pdf_filename = perform_ocr(image, i, converted_output_dir)
+        ocr_pdf_files.append(ocr_pdf_filename)
+
+    # Merge all the OCR'd PDFs into a single searchable PDF
+    merger = PdfMerger()
+    for ocr_pdf_file in ocr_pdf_files:
+        merger.append(ocr_pdf_file)
+
+    # Save the final merged searchable PDF under the "converted" subfolder
+    final_output_pdf = os.path.join(converted_output_dir, f'{original_filename}_converted.pdf')
+    with open(final_output_pdf, "wb") as f:
+        merger.write(f)
+
+    # Remove the temporary extracted images and OCR'd PDFs
+    for ocr_pdf_file in ocr_pdf_files:
+        os.remove(ocr_pdf_file)
+        
+def rich_text_identifier(pd_path):
+    text = ""
+    path = pd_path
+    doc = fitz.open(path)
+    num = len(doc)//2
+    text += doc[num].get_text()
+    if text:
+        return 1
+    else:
+        return -1
+
+def doc_validator(file_list):
+    output_dir = '.'  # Set the output directory to the current directory
+    converted_folder = os.path.join(output_dir, 'converted')
+    os.makedirs(converted_folder, exist_ok=True)
+
+    for imgpath in file_list:
+        name = imgpath
+        val = rich_text_identifier(name)
+        if val == -1:
+            input_pdf_file = name
+            original_filename = os.path.splitext(os.path.basename(name))[0]
+            convert_pdf_to_searchable_pdf(input_pdf_file, output_dir, original_filename)
+        else:
+            # Directly copy the file to the "converted" folder
+            shutil.copy(name, os.path.join(converted_folder, os.path.basename(name)))
+
 
 def main():
     st.title("PDF Document Search and Question Answering")
@@ -147,7 +228,6 @@ def main():
     if uploaded_files is not None and len(uploaded_files) >= 1:
         print('inside upload files main')
         # Create a temporary directory to store the uploaded files
-        # Create a temporary directory to store the uploaded files
         with tempfile.TemporaryDirectory() as temp_dir:
             pdf_paths = []
             for i, file in enumerate(uploaded_files):
@@ -161,6 +241,8 @@ def main():
 
             if st.button("Upload", key="upload_button"):
                 st.text("Uploading files...")
+                doc_validator(pdf_paths)
+                pdf_paths = glob.glob(os.path.join('converted', '*.pdf'))
                 perform_search(pdf_paths)
                 st.session_state.perform_search_done = True  # Set the session state variable to indicate files are uploaded
 
@@ -190,4 +272,3 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
