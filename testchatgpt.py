@@ -43,11 +43,11 @@ def query_find(query):
 
     # Assuming 'docs' is the list containing your documents or elements
     #print(docs)
-    if docs[0].metadata['page']:
+    if 'page' in docs[0].metadata:
         pg_ref = [doc.metadata['page'] + 1 for doc in docs]
     else: 
         pg_ref =  None
-    if docs[0].metadata['source']:  
+    if 'source' in docs[0].metadata:  
         doc_name = [doc.metadata['source'] for doc in docs]
     else:
         doc_name=None
