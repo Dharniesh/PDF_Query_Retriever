@@ -58,7 +58,8 @@ def query_find(query):
 def upload_text_batch(page_texts, metadata):
     print('upload text batch')
     #index.upsert(page_texts)
-    vectorstore.add_texts(page_texts, metadata,batch_size=100) 
+    vectorstore.add_texts(page_texts, metadata,batch_size=100)
+    time.sleep(2)
 
 def process_pdf(pdf_path):
     print('process pdf')
