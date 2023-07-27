@@ -10,7 +10,7 @@ from langchain.llms import OpenAI
 from langchain.chains.question_answering import load_qa_chain
 import streamlit as st
 from langchain.memory import ConversationBufferWindowMemory
-
+import time
 from langchain.chains import ConversationChain
 
 # Check to see if there is an environment variable with your API keys, if not, use what you put below
