@@ -46,11 +46,11 @@ def query_find(query):
     if 'page' in docs[0].metadata:
         pg_ref = [doc.metadata['page'] + 1 for doc in docs]
     else: 
-        pg_ref ='Unavailable'
+        pg_ref = ['Unavailable']
     if 'source' in docs[0].metadata:  
         doc_name = [doc.metadata['source'] for doc in docs]
     else:
-        doc_name='Unavailable'
+        doc_name= 'Unavailable'
 
     result = chain.run(input_documents=docs, question=query)
 
