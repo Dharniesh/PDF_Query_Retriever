@@ -47,7 +47,7 @@ def query_find(query):
         pg_ref = [doc.metadata['page'] + 1 for doc in docs]
     else: 
         pg_ref =  None
-    if [doc.metadata['source']:  
+    if doc.metadata['source']:  
         doc_name = [doc.metadata['source'] for doc in docs]
     else:
         doc_name=None
