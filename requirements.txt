@@ -7,3 +7,4 @@ tiktoken
 pypdf
 pycryptodome==3.15.0
 PyMuPDF
+pdf2image
