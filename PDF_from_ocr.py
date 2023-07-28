@@ -15,7 +15,6 @@ import streamlit as st
 from langchain.memory import ConversationBufferWindowMemory
 import time
 from langchain.chains import ConversationChain
-from config import openai_api, pinecone_api,pinecone_env
 import pytesseract
 import shutil
 import PyMuPDF
