@@ -6,3 +6,4 @@ openai
 tiktoken
 pypdf
 pycryptodome==3.15.0
+PyMuPDF
