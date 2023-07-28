@@ -17,7 +17,6 @@ import time
 from langchain.chains import ConversationChain
 import pytesseract
 import shutil
-import PyMuPDF
 
 # Check to see if there is an environment variable with your API keys, if not, use what you put below
 OPENAI_API_KEY = st.secrets["openai_api"]
