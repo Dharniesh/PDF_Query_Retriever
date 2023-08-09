@@ -19,7 +19,6 @@ from langchain.llms import OpenAI, VertexAI
 from langchain.chains import ConversationChain, RetrievalQAWithSourcesChain, LLMChain
 from langchain.memory import ConversationBufferWindowMemory
 from langchain import PromptTemplate
-from config import openai_api, pinecone_api, pinecone_env, palm_api
 import vertexai
 from langchain.chains.question_answering import load_qa_chain
 import time
