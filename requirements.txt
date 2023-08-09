@@ -9,3 +9,6 @@ pycryptodome==3.15.0
 PyMuPDF
 pdf2image
 pytesseract
+google-auth
+google-oauth2-tool
+vertexai
