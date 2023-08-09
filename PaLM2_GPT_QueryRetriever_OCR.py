@@ -1,5 +1,3 @@
-
-
 import os
 import pinecone
 import tempfile
@@ -22,7 +20,7 @@ from langchain import PromptTemplate
 import vertexai
 from langchain.chains.question_answering import load_qa_chain
 import time
-
+import json
 
 # Check to see if there is an environment variable with your API keys, if not, use what you put below
 OPENAI_API_KEY = st.secrets["openai_api"]
