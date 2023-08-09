@@ -12,3 +12,4 @@ pytesseract
 google-auth
 google-oauth2-tool
 vertexai
+google-cloud-aiplatform
