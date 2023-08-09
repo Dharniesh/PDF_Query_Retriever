@@ -178,12 +178,35 @@ def OpenAISearcher(query):
 )
     return conversation_with_summary.predict(input=query)
 
+def PaLM2Searcher(query):
+    prompt = '''
+    Act as a Question answering agent who assists user's questions :
+    '''
+    query = query + prompt
+    conversation_with_summary = ConversationChain(
+    llm=llm_palm, 
+    # We set a low k=2, to only keep the last 2 interactions in memory
+    memory=ConversationBufferWindowMemory(k=3), 
+    verbose=False
+)
+    return conversation_with_summary.predict(input=query)
+
 def search_openai():
     query = st.session_state.user_query
     if query:
         result = OpenAISearcher(query)
         if result is not None:
             st.subheader("OpenAI Answer:")
+            st.write(result)
+    else:
+        st.warning("Please enter a question.")
+
+def search_palm2():
+    query = st.session_state.user_query
+    if query:
+        result = PaLM2Searcher(query)
+        if result is not None:
+            st.subheader("PaLM2 Answer:")
             st.write(result)
     else:
         st.warning("Please enter a question.")
@@ -295,7 +318,7 @@ def main():
                 perform_search(pdf_paths)
                 st.session_state.perform_search_done = True  # Set the session state variable to indicate files are uploaded
                 
-    llm_option = st.selectbox("Select LLM:", ["ChatGPT", "PaLM2"])
+    llm_option = st.selectbox("Select LLM for PDF query retrieval:", ["ChatGPT", "PaLM2"])
     if llm_option == "llm":
         selected_llm = llm
     else:
@@ -314,7 +337,7 @@ def main():
     
 
     # Create two columns for the buttons and the text
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
 
     # Search OpenAI button in the first column
     if col1.button("Search OpenAI"):
@@ -329,6 +352,8 @@ def main():
         st.write(pgn)
         st.subheader('Document Name')
         st.write(doc_name)
+    if col3.button("Search PaLM2"):
+        search_palm2()
 
 
 if __name__ == "__main__":
