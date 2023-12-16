@@ -77,7 +77,7 @@ def process_pdf(pdf_path):
     doc_name = os.path.basename(pdf_path)
 
     # Split the PDF into smaller chunks
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=3500, chunk_overlap=0)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=2500, chunk_overlap=25)
     texts = text_splitter.split_documents(data)
 
     # Upload the contents and metadata to Pinecone
@@ -111,7 +111,8 @@ def perform_search(pdf_paths):
 
 def OpenAISearcher(query):
     prompt = '''
-    Act as a Question answering agent who assists user's questions :
+    Act as a reference checker who checks whether the given question asked by user is given in the documents. Answer them strictly and do not presume anything\n
+    on your own. Return a detailed explanation on why the answer is given. Here you go : 
     '''
     query = query + prompt
     conversation_with_summary = ConversationChain(
